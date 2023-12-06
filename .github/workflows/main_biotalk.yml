@@ -49,10 +49,6 @@ jobs:
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-
-    variables:
-      - name: OPENAI_API_KEY
-        value: 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
     
     steps:
       - name: Download artifact from build job
