@@ -6,6 +6,9 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
 
+from paperqa import Docs
+from typing import Optional
+import glob
 
 app = Flask(__name__, static_folder='static')
 csrf = CSRFProtect(app)
@@ -31,12 +34,25 @@ db = SQLAlchemy(app)
 # Enable Flask-Migrate commands "flask db init/migrate/upgrade" to work
 migrate = Migrate(app, db)
 
+source_files = glob.glob('books/*.pdf')
+docs = Docs()
+for d in source_files:
+    print(d)
+    docs.add(d)
+
 # The import must be done after db initialization due to circular import issue
 from models import Restaurant, Review
 
+@app.route('/chat', methods=['GET'])
+def chat(message: Optional[str] = None):
+    if message:
+        answer = docs.query(message)
+        return {'answer': answer.formatted_answer}
+
+    return {'answer': "Não encontrei uma resposta adequada."}
+
 @app.route('/', methods=['GET'])
 def index():
-    print('Request for index page received')
     restaurants = Restaurant.query.all()
     return render_template('index.html', restaurants=restaurants)
 
